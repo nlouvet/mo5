@@ -1,7 +1,7 @@
 # mo5
 Quelques outils liés au MO5 / A few tools related to the MO5
 
-## ascii2txt (travail en cours)
+## ascii2k7 (travail en cours)
 
 Il s'agit d'un programme Python pour convertir un fichier ASCII
 en une cassette (format .k7) pour les émulateurs de MO5.
