@@ -1,9 +1,12 @@
 #!/usr/bin/env python3 
 
+import argparse
+
 def prep_code(infile):
 	code = b''
 	for line in infile:
-		line = line.upper().strip()
+		#line = line.upper().strip()
+		line = line.strip()
 		print(line)
 		code += (line.encode('ascii') + b'\x0d')
 	return code
@@ -81,17 +84,27 @@ def cvt(infile, name, ext):
 	return outcode
 
 if __name__ == '__main__':
+	ap = argparse.ArgumentParser()
+	ap.add_argument('infile')
+	ap.add_argument('outfile')
+	args = ap.parse_args()
+	print(f'Input file name : {args.infile}')
+	print(f'Output file name: {args.outfile}')
+
 	try:
-		infile = open('test.txt', 'r')
-		outcode = cvt(infile, 'TEST', 'BAS')
-		for i in range(len(outcode)):
-			print(hex(outcode[i]))
-		infile.close()
-		outfile = open('test.k7', 'wb')
-		outfile.write(outcode)
-		outfile.close()
-	except KeyboardInterrupt:
-		print()
-		print('Exiting the test...')
-		ser.close()
+		infile = open(args.infile, 'r')
+		outfile = open(args.outfile, 'wb')
+	except Exception as err:
+		print(err)
+		exit(1)
+	
+	outcode = cvt(infile, 'TEST', 'BAS')
+	for i in range(len(outcode)):
+		print(hex(outcode[i]))
+	outfile.write(outcode)
+
+	infile.close()
+	outfile.close()
+	
+	exit(0)
 
