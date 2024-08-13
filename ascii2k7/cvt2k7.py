@@ -10,7 +10,6 @@ BINARY_FILE = b'\x02'
 BINARY_MODE = b'\x00'
 TEXT_MODE = b'\xFF'
 
-
 class Converter:
 	infile = None
 	data = b''
@@ -28,7 +27,7 @@ class Converter:
 		except Exception as err:
 			print(err)
 			exit(1)
-		self.data = b''
+		self.data = '\r'.encode('ascii')
 		for line in f:
 			line = line.strip()
 			try:
@@ -121,12 +120,12 @@ class Converter:
 	def gen_synchro(self):
 		return b'\x01' * 16 + b'\x3c\x5a'
 	
-	def gen_head_bloc(self):
-		bloc = self.gen_synchro()
-		# bloc type is "heading" = \x00
-		bloc += b'\x00'
-		# bloc length is 16 = \x10
-		bloc += b'\x10'
+	def gen_head_block(self):
+		block = self.gen_synchro()
+		# block type is "heading" = \x00
+		block += b'\x00'
+		# block length is 16 = \x10
+		block += b'\x10'
 		content = b''
 		# file name
 		content += '{:8s}'.format(self.basename).encode('ascii')
@@ -138,52 +137,52 @@ class Converter:
 		content += self.file_mode
 		# same byte as the previous one
 		content += b'\xff'
-		bloc += content
+		block += content
 		# checksum
-		bloc += (256 - self.checksum(content)).to_bytes(1, 'little')
-		return bloc
+		block += (256 - self.checksum(content)).to_bytes(1, 'little')
+		return block
 	
-	def gen_end_bloc(self):
+	def gen_end_block(self):
 		code = self.gen_synchro()
-		# bloc type is "ending"
+		# block type is "ending"
 		code += b'\xff'
-		# bloc length is 2 = \x02
+		# block length is 2 = \x02
 		code += b'\x02'
 		# checksum is 0
 		code += b'\x00'   
 		return code 
 
-	def gen_bloc(self, data):
-		bloc = self.gen_synchro()
-		# bloc type is "file content"
-		bloc += b'\x01'
-		# bloc length
-		bloc += ((len(data) + 2) % 256).to_bytes(1, 'little')
-		# bloc content
-		bloc += data
+	def gen_block(self, data):
+		block = self.gen_synchro()
+		# block type is "file content"
+		block += b'\x01'
+		# block length
+		block += ((len(data) + 2) % 256).to_bytes(1, 'little')
+		# block content
+		block += data
 		# checksum
-		bloc += ((256 - self.checksum(data)) % 256).to_bytes(1, 'little')
-		return bloc
+		block += ((256 - self.checksum(data)) % 256).to_bytes(1, 'little')
+		return block
 
-	def gen_blocs(self):
-		blocs = []
+	def gen_blocks(self):
+		blocks = []
 		l = len(self.data)
 		i = 0
 		j = 254
 		while j < l:
-			tmp = self.gen_bloc(self.data[i:j])
-			blocs.append(self.gen_bloc(self.data[i:j]))
+			tmp = self.gen_block(self.data[i:j])
+			blocks.append(self.gen_block(self.data[i:j]))
 			i += 254
 			j += 254
 		if i < l:
-			blocs.append(self.gen_bloc(self.data[i:l]))
-		return blocs
+			blocks.append(self.gen_block(self.data[i:l]))
+		return blocks
 
-	def print_bloc(self, bloc):
-		print(f'[{len(bloc):d}] = ', end='')
+	def print_block(self, block):
+		print(f'[{len(block):d}] = ', end='')
 		print('{', end='')
-		print(''.join(f'0x{w:02x}, ' for w in bloc[0:-1]), end='')
-		print(f'0x{bloc[-1]:02x}', end='')
+		print(''.join(f'0x{w:02x}, ' for w in block[0:-1]), end='')
+		print(f'0x{block[-1]:02x}', end='')
 		print('}')
 	
 	def cvt(self, verbose = False):
@@ -199,22 +198,22 @@ class Converter:
 		outcode = b''
 		lengths = []
 
-		head = self.gen_head_bloc()
+		head = self.gen_head_block()
 		outcode += head
 		l = len(head)
 		lengths.append(l)
-		print(f'Head block generated ({l:d} bytes)')
+		print(f'Head blockk generated ({l:d} bytes)')
 
-		blocs = self.gen_blocs()
+		blocks = self.gen_blocks()
 		i = 0
-		for bloc in blocs:
-			outcode += bloc
-			l = len(bloc)
-			lengths.append(len(bloc))
+		for block in blocks:
+			outcode += block
+			l = len(block)
+			lengths.append(len(block))
 			print(f'Block #{i:d} generated ({l:d} bytes)')
 			i += 1
 		
-		ending = self.gen_end_bloc()
+		ending = self.gen_end_block()
 		outcode += ending
 		l = len(ending)
 		lengths.append(len(ending))
