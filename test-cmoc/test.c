@@ -3,6 +3,23 @@
 #define POKE(addr,val)     (*(unsigned char*) (addr) = (val))
 #define POKEW(addr,val)    (*(unsigned*) (addr) = (val))
 
+void CLS(void) {
+  asm {
+    ldb #12
+    swi
+    .byte 0x02
+  }
+}
+
+void WAITCH(void) {
+  asm {
+@loop:
+    swi
+    .byte 0x0A
+    beq @loop
+  }
+}
+
 void PLOT(unsigned int x, unsigned int y) {
   asm {
     ldx :x
@@ -69,22 +86,32 @@ int main() {
   int i, n = 10;
   unsigned int a = 2024;
   char *pline;
-  
-  sieve(2000);
-  
-  printf("n = %d\r\n", n);
-  for(i = 0; i < n; i++) {
-    printf("i = %d, a = %d\r\n", i, a);
-    a = a / 5;
-  }
-  for(i = 1; i < 200; i+=5) {
-    LINE(1,i, 200, 200-i);
-  }
-  printf("Enter something: ");
+
+  CLS();
+  printf("Please enter something: ");
   pline = readline();
   printf("\n");
   printf("You entered: %s\r\n", pline);
+  printf("Please press any key...");
+  WAITCH();
+  
+  CLS();
+  sieve(2000);
+  printf("Please press any key...");
+  WAITCH();
+
+  CLS();
   primes(100);
+  printf("Please press any key...");
+  WAITCH();
+  
+  CLS();
+  for(i = 0; i < 200; i+=5) {
+    LINE(0, i, 319, 199-i);
+  }
+  WAITCH();
+    
+  CLS();
   printf("Finished\r\n");
   return 0;
 }
