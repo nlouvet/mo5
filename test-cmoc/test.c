@@ -91,17 +91,17 @@ int main() {
   printf("Please enter something: ");
   pline = readline();
   printf("\n");
-  printf("You entered: %s\r\n", pline);
+  printf("You entered: \r\n\r\n%s\r\n\r\n", pline);
   printf("Please press any key...");
   WAITCH();
   
   CLS();
-  sieve(2000);
+  sieve(1000);
   printf("Please press any key...");
   WAITCH();
 
   CLS();
-  primes(100);
+  primes(1000);
   printf("Please press any key...");
   WAITCH();
   
@@ -113,6 +113,7 @@ int main() {
     
   CLS();
   printf("Finished\r\n");
+  
   return 0;
 }
 
