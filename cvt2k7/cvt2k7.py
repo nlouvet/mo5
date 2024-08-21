@@ -136,7 +136,7 @@ class Converter:
 		# file mode: 00=Binaire FF=Texte
 		content += self.file_mode
 		# same byte as the previous one
-		content += b'\xff'
+		content += self.file_mode
 		block += content
 		# checksum
 		block += (256 - self.checksum(content)).to_bytes(1, 'little')

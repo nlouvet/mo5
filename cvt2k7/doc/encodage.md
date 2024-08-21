@@ -77,7 +77,9 @@ La checksum est calculée de telle façon que la somme des octets
 
 * 00 type de bloc = 01
 * 01 longueur du bloc = x (attention, &h00 signifie 256)
-* 02 (adresse y) contenu du fichier (y = x - 1)
+* 02
+* ... contenu du fichier (y = x - 1)
+* (adresse y)
 * (adresse x) checksum
 
 Normalement tous ces blocs ont une longueur = 00 (256 octets),
