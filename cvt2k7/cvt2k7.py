@@ -97,6 +97,10 @@ class Converter:
 			self.conv_type = 'bastxt'
 			self.file_type =  BASIC_FILE
 			self.file_mode = TEXT_MODE
+		if type == 'bastok':
+			self.conv_type = 'bastok'
+			self.file_type =  BASIC_FILE
+			self.file_mode = BINARY_MODE
 		elif type == 'plainbin':
 			self.conv_type = 'plainbin'
 			self.file_type =  BINARY_FILE
@@ -190,7 +194,7 @@ class Converter:
 			self.prep_basic()
 		elif self.conv_type == 'plainbin':
 			self.prep_plainbin()
-		elif self.conv_type == 'prgbin':
+		elif self.conv_type in ['prgbin', 'bastok']:
 			self.prep_prgbin()
 		else:
 			pass
@@ -257,7 +261,7 @@ if __name__ == '__main__':
 	ap.add_argument('filename')
 	ap.add_argument('--start', type=str)
 	ap.add_argument('--exec', type=str)
-	ap.add_argument('--type', type=str, choices=['bastxt', 'plainbin', 'prgbin'])
+	ap.add_argument('--type', type=str, choices=['bastxt', 'bastok', 'plainbin', 'prgbin'])
 
 	args = ap.parse_args()
 
@@ -292,12 +296,9 @@ if __name__ == '__main__':
 		conv.set_exec_add(exec_add)
 
 	conv.set_infile(args.infile)
-
 	conv.set_file_name(args.filename)
-
 	outcode = conv.cvt(verbose = False)
 	outfile.write(outcode)
-
 	outfile.close()
 	
 	exit(0)
