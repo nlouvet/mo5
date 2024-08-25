@@ -36,8 +36,12 @@ class line_tokenizer:
 		'TAN':		b'\xFF\x89',	'PEEK':		b'\xFF\x8A',	'LEN':		b'\xFF\x8B',
 		'STR$':		b'\xFF\x8C',	'VAL':		b'\xFF\x8D',	'ASC':		b'\xFF\x8E',
 		'CHR$':		b'\xFF\x8F',	'EOF':		b'\xFF\x90',	'CINT':		b'\xFF\x91',
-		'FF92':		b'\xFF\x92',	'FF93':		b'\xFF\x93',	'FIX':		b'\xFF\x94',
-		'HEX$':		b'\xFF\x95',	'FF96':		b'\xFF\x96',	'STICK':	b'\xFF\x97',
+		#'':		b'\xFF\x92',
+		#'':		b'\xFF\x93',
+		'FIX':		b'\xFF\x94',
+		'HEX$':		b'\xFF\x95',
+		#'':		b'\xFF\x96',
+		'STICK':	b'\xFF\x97',
 		'STRIG':	b'\xFF\x98',	'GR$':		b'\xFF\x99',	'LEFT$':	b'\xFF\x9A',
 		'RIGHT$':	b'\xFF\x9B',	'MID$':		b'\xFF\x9C',	'INSTR':	b'\xFF\x9D',
 		'VARPTR':	b'\xFF\x9E',	'RND':		b'\xFF\x9F',	'INKEY$':	b'\xFF\xA0',
@@ -74,29 +78,58 @@ class line_tokenizer:
 	
 	def match_words(self, i):
 		for l in range(7, 0, -1): # l = 7,...,1
-			w = self.text[i:i+l-1]
+			w = self.text[i:i+l]
 			if w in self.words[l]:
 				return (w, l)
 		return None
+	
+	def search_prefix_word(self, v):
+		for l in range(7, 0, -1): # l = 7,...,1
+			w = v[0:l]
+			if w in self.words[l]:
+				return (w, l)
+		return None
+
+	def is_symbol(self, c):
+		return (c in self.words[1])
 
 	def get_code(self):
 		num = -1
 		code = b''
 		m = re.match(r'^\s*$', self.text)
-		if m:
+		if m: # empty lines are ignored
 			return None
 		m = re.match(r'^ *([0-9]+) ?', self.text)
 		if not m:
 			print("lines must start with a line number...")
 			return None
-		num = int(m.group(1))
-		i = m.end(0) + 1
+		num = int(m.group(1)) # line number
+		i = m.end(0) ###
 		while i < self.length:
-			m = self.match_words(i)
+			# try to extract a potential basic word to tokenize
+			m = re.match(r'^([A-Z]+)\$?\(?', self.text[i:self.length])
 			if m:
-				(w, l) = m
-				code += self.code_of_token[w]
-				i += l
+				# try to find the longest prefix of the matched
+				# word that corresponds to a basic word
+				n = self.search_prefix_word(m.group(0))
+				if n:
+					# we have found a basic word of length l
+					(w, l) = n
+					code += self.code_of_token[w]
+					i += l
+					if w == 'REM': # comment
+						code += self.text[i:-1].encode('ascii')
+						i = self.length
+				else:
+					# no basic word found as a prefix
+					code += m.group(1).encode('ascii')
+					i += len(m.group(1))
+			elif self.is_symbol(self.text[i]):
+				code += self.code_of_token[self.text[i]]
+				i += 1
+				if self.text[i] == "'": # comment
+					code += self.text[i:-1].encode('ascii')
+					i = self.length
 			else:
 				code += self.text[i].encode('ascii')
 				i += 1
@@ -131,15 +164,13 @@ if __name__ == '__main__':
 			codeline += int.to_bytes(num, 2, 'big')
 			codeline += cl
 			codeline += b'\x00'
-			print('=>', ''.join(f'{w:02X}' for w in codeline))
+			print('  =>', ''.join(f'{w:02X}' for w in codeline))
 			code += codeline
 	infile.close()
 
 	code += b'\x00\x00'
 	length = len(code)
 	code = b'\xFF' + int.to_bytes(length, 2, 'big') + code
-	#print('code produced:')
-	#print(''.join(f'{w:02X}' for w in code))
 
 	try:
 		outfile = open(args.outfile, 'wb')
