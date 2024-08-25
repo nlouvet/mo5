@@ -33,7 +33,7 @@ class Converter:
 			try:
 				self.data += (line.encode('ascii') + b'\x0d')
 			except:
-				print(line)
+				print("ASCII problem with:", line)
 				exit(1)
 		f.close()
 
@@ -97,7 +97,7 @@ class Converter:
 			self.conv_type = 'bastxt'
 			self.file_type =  BASIC_FILE
 			self.file_mode = TEXT_MODE
-		if type == 'bastok':
+		elif type == 'bastok':
 			self.conv_type = 'bastok'
 			self.file_type =  BASIC_FILE
 			self.file_mode = BINARY_MODE
