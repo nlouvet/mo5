@@ -16,27 +16,26 @@ void setup() {
 
 	Serial.println("Initializing magneto5...");
 
-	K7 k7(80); // 80 kibytes reserved
+	K7 k7(64); // 64 kibytes reserved
 
+	/*
 	SPIFlash flash(PA4);
 	flash.begin();
 	Serial.println(flash.getUniqueID());
 	Serial.println(flash.getCapacity());
 	
-	/*
 	if(!flash.eraseChip())
     	Serial.println(F("Error erasing chip"));
 	byte tab[5] = {0x01, 0x03, 0x07, 0x06, 0x08};
 	if(!flash.writeByteArray(0, tab, 5, true))
 		Serial.println(F("Error writing to flash"));
-	*/
 	
 	byte tab[5];
 	if(!flash.readByteArray(0, tab, 5, true))
 		Serial.println(F("Error reading flash"));
 	for(int16_t i = 0; i < 5; i++)
 		Serial.println(tab[i], HEX);
-
+	*/
 	Serial.println(F("READY"));
 
 	byte buffer[SERPACKETS_MAX_SIZE];
@@ -53,6 +52,12 @@ void setup() {
 	}
 
 	if(s == -1 || num_rcv != num_exp) {
+		Serial.print(F("return value: "));
+		Serial.println(s);
+		Serial.print(F("number of bytes expected: "));
+		Serial.println((int)num_exp);
+		Serial.print(F("number of bytes received: "));
+		Serial.println((int)num_rcv);
 		failure(F("error while loading the k7..."));
 	}
 

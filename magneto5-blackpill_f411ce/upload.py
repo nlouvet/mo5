@@ -48,12 +48,13 @@ if __name__ == '__main__':
 	line = ''
 	while line != 'READY':
 		line = ser.readline().decode('ascii').strip();
-		print("READER:", line)
+		print("MAGNETO5:", line)
 	
 	print('getting ready to send the file...')	
 	sp = SerPackets(ser)
 	sp.wait_ready()
 	print("ready packet received...")
+	print("size = ", size)
 	sp.send_prelude(size)
 	while True:
 		data = f.read(256)
@@ -64,11 +65,11 @@ if __name__ == '__main__':
 		sp.wait_ack()
 	sp.send_end()
 	f.close()
-	print('file sent!')
+	print('file sent, everything seems right.')
 
 	while line != 'END':
 		line = ser.readline().decode('ascii').strip();
-		print("READER:", line)
+		print("MAGNETO5:", line)
 	
 	ser.close()
 

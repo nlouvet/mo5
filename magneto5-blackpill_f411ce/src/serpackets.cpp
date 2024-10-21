@@ -57,8 +57,8 @@ int32_t wait_prelude(void) {
 	if(recv_type != SERPACKETS_PRELUDE) return false;
 	// read the size of the file to be received
 	uint32_t size32;
-	Serial.readBytes((char*)size32, sizeof(uint32_t));
-	return true;
+	Serial.readBytes((char*)&size32, sizeof(uint32_t));
+	return size32;
 }
 
 bool wait_ready(void) {
@@ -92,5 +92,5 @@ int16_t wait_data(byte *buf) {
 	if(size16 > SERPACKETS_MAX_SIZE) return -1;
 	// next read the data forming the packet
 	Serial.readBytes((char*)buf, size16);
-	return true;
+	return size16;
 }
