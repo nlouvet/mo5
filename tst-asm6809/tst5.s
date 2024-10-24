@@ -21,7 +21,7 @@ main
 	pshs b		;   dividend
 	ldb dvs		; push the
 	pshs b		;   divisor
-	jsr div88	; division
+	jsr DIV8	; division
 	puls b		; pull the
 	stb quo		;   quotient
 	puls b		; pull the
@@ -213,3 +213,4 @@ div16_reg	RZB 2
 div16_count	RZB 2
 
 	include /print.s/
+	include /div8.s/
